@@ -1,11 +1,21 @@
-# PHP7 Firebase REST Client
+# PHP7 Firebase REST and STREAM Client
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Samuel18/zend_Firebase/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Samuel18/zend_Firebase/?branch=master)
-[![Travis CI Build Status](https://travis-ci.org/Samuel18/zend_Firebase.svg?branch=master)](https://travis-ci.org/Samuel18/zend_Firebase)
+[![Travis CI Build Status](https://travis-ci.org/samuel20miglia/zend_Firebase.svg?branch=master)](https://travis-ci.org/Samuel18/zend_Firebase)
+
+[![PHP 7 ready](http://php7ready.timesplinter.ch/samuel20miglia/zend_Firebase/badge.svg)](https://travis-ci.org/Samuel18/zend_Firebase)
+[![Total Downloads](https://poser.pugx.org/zend_firebase/zend_firebase/downloads)](https://packagist.org/packages/zend_firebase/zend_firebase)
+[![Latest Stable Version](https://poser.pugx.org/zend_firebase/zend_firebase/v/stable)](https://packagist.org/packages/zend_firebase/zend_firebase)
+[![License](https://poser.pugx.org/zend_firebase/zend_firebase/license)](https://packagist.org/packages/zend_firebase/zend_firebase)
 
 Based on the [Firebase REST API](https://firebase.google.com/docs/reference/rest/database/).
 
 Available on [Packagist](https://packagist.org/packages/zend_firebase/zend_firebase).
+
+###Prerequisites
+- PHP >= 7.0
+- Firebase Active Account
+- Composer (recommended, not required)
 
 ### Adding Firebase PHP to your project using Composer
 
@@ -17,11 +27,11 @@ composer require zend_firebase/zend_firebase dev-master
 
 More info about Composer at [getcomposer.org](http://getcomposer.org).
 
-### Example of Usage
+### Simple Example of Usage
 ```php
-use ZendFirebase\FirebaseInit, ZendFirebase\Config\AuthSetup;
+use ZendFirebase\Firebase, ZendFirebase\Config\FirebaseAuth;
 
-$auth = new AuthSetup();
+$auth = new FirebaseAuth();
 
 $auth->setBaseURI('https://your_url_from_firebase/');
 $auth->setServertoken('your_firebase_token');
@@ -30,59 +40,116 @@ $auth->setServertoken('your_firebase_token');
 $test = array(
     "name" => "TEST",
     "id" => 5245,
-    "text" => 'ciao TEST 5245',
-    'status' => 'sended'
+    "text" => "hello TEST 5245",
+    "status" => "sended"
 );
 
 /* --- CREATE NEW OBJECT AND PASS CREDENTIAL --- */
-$firebase = new FirebaseInit($auth);
+$firebase = new Firebase($auth);
+
 
 /* --- CHOOCE THE OPERATION (SAME NAME OF FIREBASE DOCS)  --- */
-$firebase->post('usersMessages', $test);
+$firebase->post('path', $test);
 ```
+Inside folder "examples" you can find some another simple complete example for library usage. 
+
 ### Response Usage
 ```php
 
-/* to create a responce */
-$firebase->makeResponce();
-
 /* --- FIREBASE DATA FROM REALTIME DB IS AN ARRAY  --- */
+$firebase->getFirebaseData(); 	// <- array, data returning from Firebase
+echo $firebase->getOperation(); // <- string, operation just made (for example: GET or POST etc...)
+echo $firebase->getStatus(); 	// <- numeric, status of request (for example: 200 or 400 or 500)
+```
+### Get Last Auto-Increment Id generate from Firebase after 'post' command
+```php
 
-$firebase->getFirebaseData(); <- array
-echo $firebase->getOperation(); <- type of current operation for example: GET or POST etc...
-echo $firebase->getStatus(); <- status of request for example: 200 or 400 or 500
+/* --- GET LAST AUTO-INCREMENT ID INSERED AFTER POST COMMAND --- */
+$firebase->getLastIdStored();
+
 ```
 
 ### Supported Commands
 ```php
 
-/* --- storing data --- */
-$firebase->post('usersMessages', $test,$options);
-/* --- override data --- */
-$firebase->put('usersMessages', $test,$options);
-/* --- update data --- */
-$firebase->patch('usersMessages', $test,$options);
-/* --- retrieve data --- */
-$firebase->get('usersMessages',$options);
-/* --- delete data --- */
-$firebase->delete('usersMessages',$options);
+/* --- STORING DATA --- */
+$firebase->post('path', $test,$options); 
+/* --- OVERRIDE DATA --- */
+$firebase->put('path', $test,$options);
+/* --- UPDATE DATA --- */
+$firebase->patch('path', $test,$options);
+/* --- RETRIEVE DATA --- */
+$firebase->get('path',$options);
+/* --- DELETE DATA --- */
+$firebase->delete('path',$options);
+```
+<hr/>
+
+### Rest Stream API
+
+Create a new file your_file_name.php .
+
+Inside this new file insert the following code : 
+
+```php
+
+use ZendFirebase\Firebase, ZendFirebase\Config\FirebaseAuth;
+
+$auth = new FirebaseAuth();
+
+$auth->setBaseURI('https://your_url_from_firebase/');
+$auth->setServertoken('your_firebase_token');
+
+
+/* --- CREATE NEW OBJECT AND PASS CREDENTIAL --- */
+$firebase = new Firebase($auth);
+
+
+$options = []; // container options as type array
+
+$callback = 'callbackFunction'; // name of callback function as type string
+
+function callbackFunction(...$params){
+    // all code needed
+}
+
+$print = true;
+
+/* --- SET PATH, 
+	   NAME OF FOLDER WHERE STORE LOGS, 
+	   MILLISECONDS OF DELAY BETWEEN NEW REQUEST (not required, default 5000), 
+	   CALLBACK FUNCTION, 
+	   ARRAY OPTIONS (not required, default []),
+	   PRINT (not required, default TRUE) --- */
+$firebase->startStream('path', 'logs/', 5000, $callback, $options, $print);
 ```
 
+Now for run listener open terminal and run you file with command : 
+```bash
+php your_file_name.php
+```
 
-### Unit Tests
+This method start listener and write log file of changes.
+
+<hr/>
+### PHPUnit Tests
 All the unit tests are found in the "/tests" directory.
 Due to the usage of an interface, the tests must run in isolation.
 
-Project Configuration it's just setted for doing all tests with the simple command 
- 
-```bash 
+Project Configuration it's just setted for doing all tests with the simple command : 
+
+```bash
 cd <your_project>
 
 phpunit
 ```
 
+If you want to run a single test, just run :
+```bash
+cd <your_project>
 
-
+phpunit name_and_path_of_the_file_that_you_want_to_test.php
+```
 
 #### BSD 3-Clause License
 

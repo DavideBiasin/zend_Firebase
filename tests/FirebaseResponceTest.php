@@ -1,4 +1,6 @@
 <?php
+namespace ZendFirebaseTest;
+
 use ZendFirebase\FirebaseResponce;
 
 require_once 'src/FirebaseResponce.php';
@@ -9,7 +11,7 @@ require_once 'src/FirebaseResponce.php';
  * @author Davide Biasin
  *
  */
-class FirebaseResponceTest extends PHPUnit_Framework_TestCase
+class FirebaseResponceTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
@@ -48,19 +50,9 @@ class FirebaseResponceTest extends PHPUnit_Framework_TestCase
      */
     public function testConstruct()
     {
-        $this->firebaseResponce->__construct($this->firebaseResponce);
+        $this->firebaseResponce->__construct();
 
         $this->assertNotEquals(FirebaseResponce::class, $this->firebaseResponce);
-    }
-
-    /**
-     * TestsFirebaseResponce __destruct()
-     */
-    public function testDestruct()
-    {
-        $firebase = $this->firebaseResponce->__destruct();
-
-        $this->assertNull($firebase);
     }
 
     /**
@@ -113,4 +105,3 @@ class FirebaseResponceTest extends PHPUnit_Framework_TestCase
         $this->firebaseResponce->validateResponce();
     }
 }
-

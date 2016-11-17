@@ -3,3 +3,7 @@
 .project
 .buildpath
 /.settings/*
+/logs/
+/.settings/
+/delete.php
+/patch.php
