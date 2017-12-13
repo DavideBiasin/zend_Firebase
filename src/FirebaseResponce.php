@@ -1,11 +1,21 @@
 <?php
 declare(strict_types = 1);
-namespace ZendFirebase;
+namespace Zend\Firebase;
+
+/**
+ * PHP7 FIREBASE LIBRARY (http://samuelventimiglia.it/)
+ *
+ *
+ * @link https://github.com/samuel20miglia/zend_Firebase
+ * @copyright Copyright (c) 2016-now Ventimiglia Samuel - Biasin Davide
+ * @license BSD 3-Clause License
+ *
+ */
 
 /**
  *
  * @author Davide Biasin
- *
+ * @package ZendFirebase
  */
 class FirebaseResponce
 {
@@ -15,7 +25,7 @@ class FirebaseResponce
      *
      * @var array $firebaseData
      */
-    private $firebaseData;
+    protected $firebaseData;
 
     /**
      * Type of operation
@@ -30,20 +40,6 @@ class FirebaseResponce
      * @var integer $status
      */
     protected $status;
-
-    /**
-     * Constructior method
-     */
-    public function __construct()
-    {
-    }
-
-    /**
-     * Remove this current Object from memory
-     */
-    public function __destruct()
-    {
-    }
 
     /**
      * Format to array the responce
@@ -80,7 +76,7 @@ class FirebaseResponce
      *
      * @param array $firebaseData
      */
-    public function setFirebaseData($firebaseData)
+    protected function setFirebaseData($firebaseData)
     {
         $this->firebaseData = $firebaseData;
     }
@@ -90,7 +86,7 @@ class FirebaseResponce
      *
      * @param string $operation
      */
-    public function setOperation($operation)
+    protected function setOperation($operation)
     {
         $this->operation = $operation;
     }
@@ -100,7 +96,7 @@ class FirebaseResponce
      *
      * @param integer $status
      */
-    public function setStatus($status)
+    protected function setStatus($status)
     {
         $this->status = $status;
     }
@@ -111,29 +107,87 @@ class FirebaseResponce
      *
      * @throws \Exception
      */
-    public function validateResponce()
+    protected function validateResponce()
     {
-        
-        /* check validity of Operation */
+        try {
+            /* check validity of Operation */
+            $this->validateOperation();
+
+            /* check validity of Status */
+            $this->validateStatus();
+
+            /* check validity of FirebaseData */
+            $this->validateData();
+        } catch (\Exception $e) {
+            throw $e->getMessage();
+        }
+    }
+
+    /**
+     * Validate type of data receved
+     *
+     * @throws \Exception
+     */
+    private function validateOperation()
+    {
         if (!is_string($this->getOperation())) {
             $getOperation = "Operation parameter must be STRING and NOT EMPTY. Received : ";
             $getOperation .= gettype($this->getOperation()) . " ({$this->getOperation()}).";
-            
+
             throw new \Exception($getOperation);
         }
-        
-        /* check validity of Status */
+    }
+
+    /**
+     * Validate type of data receved
+     *
+     * @throws \Exception
+     */
+    private function validateStatus()
+    {
         if (!is_numeric($this->getStatus())) {
             $getStatus = "Status parameter must be NUMERIC. Received : ";
             $getStatus .= gettype($this->getStatus()) . " ({$this->getStatus()}).";
-            
+
             throw new \Exception($getStatus);
         }
-        
-        /* check validity of FirebaseData */
+    }
+
+    /**
+     * Validate type of data receved
+     *
+     * @throws \Exception
+     */
+    private function validateData()
+    {
         if (!is_array($this->getFirebaseData())) {
             $gettype = "FirebaseData parameter must be ARRAY. Received : " . gettype($this->getFirebaseData()) . ".";
             throw new \Exception($gettype);
         }
+    }
+
+    /**
+     * Validate type of json receved
+     *
+     * @return string
+     */
+    protected function validateJson():string
+    {
+        switch (json_last_error()) {
+            case JSON_ERROR_NONE:
+                $jsonValidator = '';
+                break;
+            case JSON_ERROR_STATE_MISMATCH:
+                $jsonValidator = ' - Underflow or the modes mismatch';
+                break;
+            case JSON_ERROR_SYNTAX:
+                $jsonValidator = ' - Syntax error, malformed JSON';
+                break;
+            case JSON_ERROR_UTF8:
+                $jsonValidator = ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+                break;
+        }
+
+        return $jsonValidator;
     }
 }

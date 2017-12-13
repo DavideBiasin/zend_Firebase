@@ -1,16 +1,17 @@
 <?php
-namespace ZendFirebaseTest;
+namespace Zend\FirebaseTest;
 
-use ZendFirebase\Firebase;
-use ZendFirebase\Config\FirebaseAuth;
+use Zend\Firebase\Firebase;
+use Zend\Firebase\Authentication\FirebaseAuth;
+use PHPUnit\Framework\TestCase;
 
 require_once 'src/Firebase.php';
-require_once 'src/Config/FirebaseAuth.php';
+require_once 'src/Authentication/FirebaseAuth.php';
 
 /**
  * Firebase test case.
  */
-class FirebaseTest extends \PHPUnit_Framework_TestCase
+class FirebaseTest extends TestCase
 {
 
     /**
@@ -37,7 +38,7 @@ class FirebaseTest extends \PHPUnit_Framework_TestCase
 
         $this->auth->setServertoken($this->token);
         $this->auth->setBaseURI($this->baseUri);
-        // TODO Auto-generated FirebaseInitTest::setUp()
+        // Auto-generated FirebaseInitTest::setUp()
         $this->firebaseInit = new Firebase($this->auth);
     }
 
@@ -53,23 +54,15 @@ class FirebaseTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Constructs the test case.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Tests FirebaseInit->__construct()
      */
     public function testConstruct()
     {
-        $this->firebaseInit->__construct($this->auth);
+
         $testAuth = new FirebaseAuth();
         $testAuth->setServertoken($this->token);
         $testAuth->setBaseURI($this->baseUri);
-
+        $this->firebaseInit->__construct($this->auth);
         $this->assertEquals($testAuth, $this->auth);
     }
 
@@ -95,8 +88,14 @@ class FirebaseTest extends \PHPUnit_Framework_TestCase
      */
     public function testMakeResponce()
     {
-        $this->firebaseInit->get('users');
-        $this->firebaseInit->makeResponce();
+        $this->auth = new FirebaseAuth();
+
+        $this->auth->setServertoken($this->token);
+        $this->auth->setBaseURI($this->baseUri);
+        // Auto-generated FirebaseInitTest::setUp()
+        $this->firebaseInit = new Firebase($this->auth);
+
+        $this->firebaseInit->get('users/');
 
         $this->assertNotEmpty($this->firebaseInit->getFirebaseData());
 
@@ -110,38 +109,59 @@ class FirebaseTest extends \PHPUnit_Framework_TestCase
     /**
      * Test FirebaseInit->getStatus()
      * @depends testMakeResponce
-     * @dataProvider testMakeResponce
+     *
      */
-    public function testGetStatus($status)
+    public function testGetStatus()
     {
-        $this->assertNotNull($status['status']);
+        $this->firebaseInit->get('users/');
+        $this->assertNotNull($this->firebaseInit->getStatus());
         /* type int */
-        $this->assertInternalType('int', $status['status']);
+        $this->assertInternalType('int', $this->firebaseInit->getStatus());
     }
 
     /**
      * Test FirebaseInit->getOperation()
      * @depends testMakeResponce
-     * @dataProvider testMakeResponce
+     *
      */
-    public function testGetOperation($operation)
+    public function testGetOperation()
     {
-        $this->assertNotNull($operation['operation']);
+        $this->firebaseInit->get('users/');
+        $this->assertNotNull($this->firebaseInit->getOperation());
 
         /* type string */
-        $this->assertInternalType('string', $operation['operation']);
+        $this->assertInternalType('string', $this->firebaseInit->getOperation());
     }
 
     /**
      * Test FirebaseInit->getFirebaseData()
      * @depends testMakeResponce
-     * @dataProvider testMakeResponce
+     *
      */
-    public function testGetFirebaseData($firebase)
+    public function testGetFirebaseData()
     {
-        $this->assertNotNull($firebase['responce']);
+        $this->firebaseInit->get('users/');
+        $this->assertNotNull($this->firebaseInit->getFirebaseData());
 
         /* type array */
-        $this->assertInternalType('array', $firebase['responce']);
+        $this->assertInternalType('array', $this->firebaseInit->getFirebaseData());
+    }
+
+    /**
+     * Test Firebase->getLastIdStored()
+     *
+     */
+    public function testGetSetLastIdStored()
+    {
+        /* type string */
+        $this->assertInternalType('string', $this->firebaseInit->getLastIdStored());
+        /* assert empty string */
+        $this->assertEquals('', $this->firebaseInit->getLastIdStored());
+
+        $this->firebaseInit->setLastIdStored('id123abc');
+        /* type string */
+        $this->assertInternalType('string', $this->firebaseInit->getLastIdStored());
+        /* assert empty string */
+        $this->assertEquals('id123abc', $this->firebaseInit->getLastIdStored());
     }
 }

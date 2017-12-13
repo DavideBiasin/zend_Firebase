@@ -1,12 +1,12 @@
 <?php
 declare(strict_types = 1);
-namespace ZendFirebase\Config;
+namespace Zend\Firebase\Authentication;
 
 /**
  * PHP7 FIREBASE LIBRARY (http://samuelventimiglia.it/)
  *
  *
- * @link https://github.com/Samuel18/zend_Firebase
+ * @link https://github.com/samuel20miglia/zend_Firebase
  * @copyright Copyright (c) 2016-now Ventimiglia Samuel - Biasin Davide
  * @license BSD 3-Clause License
  *
@@ -28,6 +28,9 @@ class FirebaseAuth
      */
     private $serverToken;
 
+    /**
+     *
+     */
     public function __construct()
     {
         //
@@ -63,7 +66,7 @@ class FirebaseAuth
             trigger_error($str, E_USER_ERROR);
         }
         $baseURI .= (substr($baseURI, - 1) == '/' ? '' : '/');
-        
+
         $this->baseURI = \trim($baseURI);
     }
 

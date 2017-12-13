@@ -1,15 +1,14 @@
 <?php
-namespace ZendFirebase\Stream;
+namespace Zend\Firebase\Stream;
 
 use GuzzleHttp;
 use RuntimeException;
-use phpDocumentor\Reflection\DocBlock\Tags\Generic;
 
 /**
  * PHP7 FIREBASE LIBRARY (http://samuelventimiglia.it/)
  *
  *
- * @link https://github.com/Samuel18/zend_Firebase
+ * @link https://github.com/samuel20miglia/zend_Firebase
  * @copyright Copyright (c) 2016-now Ventimiglia Samuel - Biasin Davide
  * @license BSD 3-Clause License
  *
@@ -55,6 +54,13 @@ class StreamClient
     private $url;
 
     /**
+     * Request options to add to url
+     *
+     * @var string
+     */
+    private $options = [];
+
+    /**
      * Last received message id
      *
      * @var string $lastMessageId
@@ -75,11 +81,12 @@ class StreamClient
      * @param integer $requestDelay
      * @throws InvaliArgumentException
      */
-    public function __construct($url, $requestDelay)
+    public function __construct($url, $requestDelay, $options)
     {
         $this->url = $url;
         $this->retry = $requestDelay;
-        
+        $this->options = $options;
+
         if (empty($this->url)) {
             throw new \InvalidArgumentException('Error: url empty...');
         }
@@ -97,9 +104,11 @@ class StreamClient
                 'Accept' => 'text/event-stream',
                 'Cache-Control' => 'no-cache',
                 'allow_redirects' => true
-            ]
+            ],
+
+            'base_uri' => $this->url,
         ]);
-        
+
         $this->connect();
     }
 
@@ -128,28 +137,42 @@ class StreamClient
      */
     private function connect()
     {
-        
+
         $this->sendRequest();
-        
+
         if ($this->response->getStatusCode() == 204) {
             throw new RuntimeException('Error: Server forbid connection retry by responding 204 status code.');
         }
     }
-    
+
+    /**
+     * Create url with or without query options
+     *
+     * @return string
+     */
+    private function createUrl(): string
+    {
+        return $this->url . $this->options;
+    }
+
     /**
      * Send Request
      */
     private function sendRequest()
     {
-        $headers = [];
-        if ($this->lastMessageId) {
-            $headers['Last-Event-ID'] = $this->lastMessageId;
-        }
-        
-        $this->response = $this->client->request('GET', $this->url, [
+        try {
+            $headers = [];
+            if ($this->lastMessageId) {
+                $headers['Last-Event-ID'] = $this->lastMessageId;
+            }
+
+            $this->response = $this->client->request('GET', $this->createUrl(), [
             'stream' => true,
-            'headers' => $headers
-        ]);
+            'headers' => $headers,
+            ]);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            die((string) $e->getResponse()->getBody());
+        }
     }
 
 
@@ -160,41 +183,41 @@ class StreamClient
     {
         /* initialize empty buffer */
         $buffer = '';
-        
+
         /* bring body of response */
         $body = $this->response->getBody();
-        
+
         /* infinte loop */
         while (true) {
             /* if server close connection - try to reconnect */
             if ($body->eof()) {
                 /* wait retry period before reconnection */
                 sleep($this->retry / 1000);
-                
+
                 /* reconnect */
                 $this->connect();
-                
+
                 /* clear buffer since there is no sense in partial message */
                 $buffer = '';
             }
             /* start read into stream */
             $buffer .= $body->read(1);
-            
+
             if (preg_match(self::END_OF_MESSAGE, $buffer)) {
                 $parts = preg_split(self::END_OF_MESSAGE, $buffer, 2);
-                
+
                 $rawMessage = $parts[0];
                 $remaining = $parts[1];
-                
+
                 $buffer = $remaining;
-                
+
                 /**
                  * Save event into StreamEvent
                  *
                  * @var StreamEvent $event
                  */
                 $event = StreamEvent::parse($rawMessage);
-                
+
                 yield $event;
             }
         }

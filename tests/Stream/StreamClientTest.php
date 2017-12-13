@@ -1,5 +1,6 @@
 <?php
-use ZendFirebase\Stream\StreamClient;
+use Zend\Firebase\Stream\StreamClient;
+use PHPUnit\Framework\TestCase;
 
 require_once 'src/Stream/StreamClient.php';
 
@@ -8,7 +9,7 @@ require_once 'src/Stream/StreamClient.php';
  *
  * @author Davide Biasin
  */
-class StreamClientTest extends PHPUnit_Framework_TestCase
+class StreamClientTest extends TestCase
 {
 
     /**
@@ -18,11 +19,18 @@ class StreamClientTest extends PHPUnit_Framework_TestCase
     private $streamClient;
 
     /**
+     * Url
      *
      * @var string
      */
     private $url = 'https://zendfirebase.firebaseio.com/';
 
+    /**
+     * Password
+     *
+     * @var string
+     */
+    private $auth = 'users.json?auth=YdLUSTlxVOAEEuLAMpB49lAm98AMMCMMWm6y82r4';
     /**
      * Prepares the environment before running a test.
      */
@@ -30,8 +38,9 @@ class StreamClientTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
+
         /* New instance of StreamClient */
-        $this->streamClient = new StreamClient($this->url, 0);
+        $this->streamClient = new StreamClient($this->url, 0, $this->auth);
     }
 
     /**
@@ -52,7 +61,7 @@ class StreamClientTest extends PHPUnit_Framework_TestCase
      */
     public function test__construct()
     {
-        $this->streamClient->__construct('', 0);
+        $this->streamClient->__construct('', 0, '');
     }
 
     /**
